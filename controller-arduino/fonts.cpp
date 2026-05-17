@@ -26,8 +26,8 @@ bool FixedFont::put_char_at(Screen* screen, int16_t x, int16_t y, char c, CharAt
 	for (int i = 0; i < cell_h; i++) {
 	    for (int j = 0; j < cell_w; j++) {
 		if (font_data[idx] & (0x80>>j))
-		    fill2x2(buf+j, attribs.fg, screen->line_offset);
-		else if (!attribs.alpha_bg) fill2x2(buf+j, attribs.bg, screen->line_offset);
+		    fill2x2(buf+j*2, attribs.fg, screen->line_offset);
+		else if (!attribs.alpha_bg) fill2x2(buf+j*2, attribs.bg, screen->line_offset);
 	    }
 	    idx++;
 	    buf += screen->line_offset*2;
