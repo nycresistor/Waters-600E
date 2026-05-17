@@ -78,9 +78,14 @@ void loop()
     x++;
     if (x >= LOGICAL_WIDTH/blocksize) { x = 0; y++; if (y >= LOGICAL_HEIGHT/blocksize) { y = 0; frame++; } }
 
-    Screen scr(LCD_WIDTH, LCD_HEIGHT,(uint16_t*)lcd->getFrameBufferByIndex(0));
+    Screen scr(LOGICAL_WIDTH, LCD_HEIGHT,
+	       (uint16_t*)lcd->getFrameBufferByIndex(0), LCD_WIDTH);
     CharAttr attr = { .alpha_bg = false, .double_size = false,
 		      .fg = 0xffe7, .bg = 0x000f };
     waters.put_str_at(&scr, 200, 200, "This is not really happening.", attr);
+    attr.double_size = true;
+    attr.alpha_bg = true;
+    attr.fg = 0x000f;
+    waters.put_str_at(&scr, 100, 100, "This is not real", attr);
 
 }
