@@ -1,45 +1,35 @@
 #include "waveshare_lcd_port.h"
 #include "esp_memory_utils.h"
 
-#include "waters_font.h"
+#include "fonts.h"
 
 using namespace esp_panel::drivers;
 using namespace esp_panel::utils;
+
+#define LOGICAL_WIDTH 640
+#define LOGICAL_HEIGHT 480
+
+#define TERMINAL_WIDTH (LOGICAL_WIDTH/8)
+#define TERMINAL_HEIGHT (LOGICAL_HEIGHT/8)
 
 LCD *create_lcd_with_config(void);
 LCD *create_lcd_without_config(void);
 
 LCD* lcd;
-bool put_char(uint16_t* buf, int lineoff, char c, uint16_t color) {
-    if (c > MAX_ENCODING) return false;
-    int idx = font_enc_map[c];
-    if (idx == -1) return false;
-    for (int i = 0; i < 16; i++) {
-        for (int j = 0; j < 8; j++) {
-            if (font_data[idx] & (1<<j)) buf[j] = color;
-        }
-        idx++;
-        buf += lineoff;
-    }
-    return true;
-}
+
 bool draw_square(int x, int y, int w, int h, uint16_t color)
 {
     if (!lcd->isOverState(LCD::State::BEGIN)) return false;
 
     int bitspp = lcd->getFrameColorBits();
-
-    auto y_coord_align = lcd->getBasicAttributes().basic_bus_spec.y_coord_align;
     int bpp = bitspp / 8;
-    // Make sure the height is aligned to the `y_coord_align`
-    //Serial.print(x); Serial.print(","); Serial.print(y); Serial.print(" bpp is"); Serial.println(bpp);
-
-    /* Malloc memory for a single color bar */
-    vector<uint16_t> buf_v(w*h);
-    auto buf = buf_v.data();
-    for (int i = 0; i < w*h; i++) buf[i] = color;
-    put_char(buf, w, 'A' + (color %52), 0x0000);
-    if (!lcd->drawBitmap(x, y, w, h, (uint8_t*)buf, -1)) Serial.println("drawbitmap oh no");
+    uint16_t* fb = (uint16_t*)lcd->getFrameBufferByIndex(0);
+    fb += y*LCD_WIDTH + x;
+    for (int i = 0; i < h; i++) {
+	for (int j = 0; j < w; j++) fb[j] = color;
+	fb += LCD_WIDTH;
+    }
+	
     return true;
 }
 
@@ -52,7 +42,7 @@ void setup()
     //auto lcd = create_lcd_without_config();
     // Configure bounce buffer to avoid screen drift
     auto bus = static_cast<BusRGB *>(lcd->getBus());
-    bus->configRGB_BounceBufferSize(EXAMPLE_LCD_RGB_BOUNCE_BUFFER_SIZE); // Set bounce buffer to avoid screen drift
+    bus->configRGB_BounceBufferSize(LCD_RGB_BOUNCE_BUFFER_SIZE); // Set bounce buffer to avoid screen drift
 
     lcd->init();
     // Attach a callback function which will be called when the Vsync signal is detected
@@ -71,6 +61,8 @@ void setup()
     Serial.println("RGB LCD example end"); // Print end message for RGB LCD example
 }
 
+const char* lorip = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+
 int x = 0;
 int y = 0;
 int frame = 0;
@@ -81,7 +73,14 @@ void loop()
     uint8_t shift = (x+y+(2*frame)) % 16;
     uint16_t color = 0xf000 >> shift | 0x00f0 << (16 - shift);
     if(!draw_square(x*blocksize,y*blocksize,blocksize,blocksize,color)) Serial.println("oh no");
+    int ty = (frame+y+x/2)%TERMINAL_HEIGHT;
+    //put_str_pos(0,ty,lorip + ty, 0x7000);
     x++;
-    if (x >= 800/blocksize) { x = 0; y++; if (y >= 480/blocksize) { y = 0; frame++; } }
+    if (x >= LOGICAL_WIDTH/blocksize) { x = 0; y++; if (y >= LOGICAL_HEIGHT/blocksize) { y = 0; frame++; } }
+
+    Screen scr(LCD_WIDTH, LCD_HEIGHT,(uint16_t*)lcd->getFrameBufferByIndex(0));
+    CharAttr attr = { .alpha_bg = false, .double_size = false,
+		      .fg = 0xffe7, .bg = 0x000f };
+    waters.put_str_at(&scr, 200, 200, "This is not really happening.", attr);
 
 }

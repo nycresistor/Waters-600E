@@ -1,0 +1,2 @@
+default_fqbn: esp32:esp32:waveshare_esp32_s3_touch_lcd_7:UploadSpeed=921600,USBMode=hwcdc,CDCOnBoot=cdc,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,CPUFreq=240,FlashMode=qio,FlashSize=8M,PartitionScheme=default,DebugLevel=none,PSRAM=enabled,LoopCore=1,EventsCore=1,EraseFlash=none
+default_port: /dev/ttyACM0
