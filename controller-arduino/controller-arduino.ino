@@ -12,8 +12,7 @@ using namespace esp_panel::utils;
 #define TERMINAL_WIDTH (LOGICAL_WIDTH/8)
 #define TERMINAL_HEIGHT (LOGICAL_HEIGHT/8)
 
-LCD *create_lcd_with_config(void);
-LCD *create_lcd_without_config(void);
+LCD *create_lcd();
 
 LCD* lcd;
 
@@ -36,9 +35,8 @@ bool draw_square(int x, int y, int w, int h, uint16_t color)
 void setup()
 {
     Serial.begin(115200); // Initialize serial communication at 115200 baud rate
-    Serial.println("RGB LCD example start"); // Print start message for RGB LCD example
 
-    lcd = create_lcd_without_config();
+    lcd = create_lcd();
     //auto lcd = create_lcd_without_config();
     // Configure bounce buffer to avoid screen drift
     auto bus = static_cast<BusRGB *>(lcd->getBus());

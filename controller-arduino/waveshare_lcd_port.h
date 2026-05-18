@@ -18,18 +18,10 @@
 #define SD_CS 4
 #define USB_SEL 5     // USB select pin
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////// Please update the following configuration according to your LCD spec //////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * Currently, the library supports the following RGB (without 3-wire SPI) LCDs:
- *      - ST7262
- */
 #define LCD_NAME                        ST7262 // LCD model name
 #define LCD_WIDTH                       (800) // LCD width in pixels
 #define LCD_HEIGHT                      (480) // LCD height in pixels
 #define LCD_COLOR_BITS                  (24)  // Color depth in bits
-#define LCD_RGB_DATA_WIDTH              (16)  // Width of RGB data
 #define LCD_RGB_COLOR_BITS          (16)    // |      24      |      16       |
 
 #define LCD_RGB_TIMING_FREQ_HZ          (16 * 1000 * 1000) // RGB timing frequency
@@ -41,9 +33,7 @@
 #define LCD_RGB_TIMING_VFP              (8)   // Vertical front porch
 #define LCD_RGB_BOUNCE_BUFFER_SIZE  (LCD_WIDTH * 10)
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////// Please update the following configuration according to your board spec ////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #define LCD_RGB_IO_DISP            (-1)  // RGB display pin number
 #define LCD_RGB_IO_VSYNC           (3)   // VSYNC pin number
 #define LCD_RGB_IO_HSYNC           (46)  // HSYNC pin number
@@ -57,7 +47,6 @@
 #define LCD_RGB_IO_DATA5           (39)  // RGB data pin 5
 #define LCD_RGB_IO_DATA6           (0)   // RGB data pin 6
 #define LCD_RGB_IO_DATA7           (45)  // RGB data pin 7
-#if LCD_RGB_DATA_WIDTH > 8
 #define LCD_RGB_IO_DATA8           (48)  // RGB data pin 8
 #define LCD_RGB_IO_DATA9           (47)  // RGB data pin 9
 #define LCD_RGB_IO_DATA10          (21)  // RGB data pin 10
@@ -66,17 +55,13 @@
 #define LCD_RGB_IO_DATA13          (42)  // RGB data pin 13
 #define LCD_RGB_IO_DATA14          (41)  // RGB data pin 14
 #define LCD_RGB_IO_DATA15          (40)  // RGB data pin 15
-#endif
 #define LCD_RST_IO                 (-1)  // Reset pin number
 #define LCD_BL_IO            (-1)  // Backlight pin number
 #define LCD_BL_ON_LEVEL           (1)   // Backlight ON level
 #define LCD_BL_OFF_LEVEL !LCD_BL_ON_LEVEL // Backlight OFF level
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////// Please update the following configuration according to your test ///////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define LCD_ENABLE_PRINT_FPS            (1)
-#define LCD_ENABLE_DRAW_FINISH_CALLBACK (1)
+#define LCD_ENABLE_PRINT_FPS            (0)
+#define LCD_ENABLE_DRAW_FINISH_CALLBACK (0)
 
 #define _LCD_CLASS(name, ...) LCD_##name(__VA_ARGS__)
 #define LCD_CLASS(name, ...)  _LCD_CLASS(name, ##__VA_ARGS__)
@@ -86,9 +71,5 @@
 #define LCD_PRINT_FPS_COUNT_MAX         (50)
 
 #endif // LCD_ENABLE_PRINT_FPS
-
-
-
-void waveshare_lcd_init(); // Function to initialize LCD
 
 #endif // End of IO_PORT_H

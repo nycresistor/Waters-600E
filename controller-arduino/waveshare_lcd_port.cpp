@@ -2,20 +2,9 @@
 
 using namespace esp_panel::drivers;
 
-LCD *create_lcd_without_config(void)
+LCD *create_lcd(void)
 {
     BusRGB *bus = new BusRGB(
-#if LCD_RGB_DATA_WIDTH == 8
-        /* 8-bit RGB IOs */
-        LCD_RGB_IO_DATA0, LCD_RGB_IO_DATA1, LCD_RGB_IO_DATA2, LCD_RGB_IO_DATA3,
-        LCD_RGB_IO_DATA4, LCD_RGB_IO_DATA5, LCD_RGB_IO_DATA6, LCD_RGB_IO_DATA7,
-        LCD_RGB_IO_HSYNC, LCD_RGB_IO_VSYNC, LCD_RGB_IO_PCLK, LCD_RGB_IO_DE,
-        LCD_RGB_IO_DISP,
-        /* RGB timings */
-        LCD_RGB_TIMING_FREQ_HZ, LCD_WIDTH, LCD_HEIGHT,
-        LCD_RGB_TIMING_HPW, LCD_RGB_TIMING_HBP, LCD_RGB_TIMING_HFP,
-        LCD_RGB_TIMING_VPW, LCD_RGB_TIMING_VBP, LCD_RGB_TIMING_VFP
-#elif LCD_RGB_DATA_WIDTH == 16
         /* 16-bit RGB IOs */
         LCD_RGB_IO_DATA0, LCD_RGB_IO_DATA1, LCD_RGB_IO_DATA2, LCD_RGB_IO_DATA3,
         LCD_RGB_IO_DATA4, LCD_RGB_IO_DATA5, LCD_RGB_IO_DATA6, LCD_RGB_IO_DATA7,
@@ -27,7 +16,6 @@ LCD *create_lcd_without_config(void)
         LCD_RGB_TIMING_FREQ_HZ, LCD_WIDTH, LCD_HEIGHT,
         LCD_RGB_TIMING_HPW, LCD_RGB_TIMING_HBP, LCD_RGB_TIMING_HFP,
         LCD_RGB_TIMING_VPW, LCD_RGB_TIMING_VBP, LCD_RGB_TIMING_VFP
-#endif
     );
 
     /**
