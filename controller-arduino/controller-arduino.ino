@@ -2,6 +2,9 @@
 #include "esp_memory_utils.h"
 
 #include "fonts.h"
+#include "bitmaps.h"
+
+extern RLEBitmap SPLASH_bitmap;
 
 using namespace esp_panel::drivers;
 using namespace esp_panel::utils;
@@ -85,5 +88,5 @@ void loop()
     attr.alpha_bg = true;
     attr.fg = 0x000f;
     waters.put_str_at(&scr, 100, 100, "This is not real", attr);
-
+    SPLASH_bitmap.put_at_default_alpha(&scr, 0xfa00);
 }
