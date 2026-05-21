@@ -1,3 +1,8 @@
+#include <WiFi.h>
+#include "ESP32MQTTClient.h"
+
+#include "credentials.h"
+
 #include "waveshare_lcd_port.h"
 #include "esp_memory_utils.h"
 
@@ -55,14 +60,31 @@ void setup()
     if (lcd->getBasicAttributes().basic_bus_spec.isFunctionValid(LCD::BasicBusSpecification::FUNC_DISPLAY_ON_OFF)) {
         lcd->setDisplayOnOff(true);
     }
-
-    Serial.println("Draw color bar from top left to bottom right, the order is B - G - R");
-    //lcd->colorBarTest();
-
-    Serial.println("RGB LCD example end"); // Print end message for RGB LCD example
+    Screen scr(LOGICAL_WIDTH, LCD_HEIGHT,
+	       (uint16_t*)lcd->getFrameBufferByIndex(0), LCD_WIDTH);
+    SPLASH_bitmap.put_at_default_alpha(&scr, 0xfa00);
+    const char* const* ssids_iter = ssids;
+    while (*ssids_iter != nullptr) {
+	Serial.print("Trying "); Serial.println(ssids_iter[0]);
+        WiFi.begin(ssids_iter[0], ssids_iter[1]);
+	int16_t timeout = 6000;
+	while (true) {
+	    auto status = WiFi.status();
+	    if (status == WL_CONNECTED) {
+		ssids_iter = nullptr;
+		break;
+	    } else if (status == WL_CONNECT_FAILED || timeout <= 0) {
+		ssids_iter += 2;
+		break;
+	    }
+	    delay(300);
+	    timeout -= 300;
+	    Serial.print(".");
+	}
+    }
+    if (WiFi.status() == WL_CONNECTED) Serial.println("Connected to network");
+    else Serial.println("Connection failed, giving up.");
 }
-
-const char* lorip = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
 int x = 0;
 int y = 0;
