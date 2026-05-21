@@ -11,6 +11,7 @@ void RLEBitmap::put_at_alpha(Screen* s, uint16_t x, uint16_t y, uint16_t color) 
     bool pfg = false;
     uint16_t* buf = s->buffer;
     buf += (y*s->line_offset + x);
+    uint16_t bh = h;
     for (uint16_t idx  = 0; idx < dlen; idx++) {
 	uint16_t rl;
 	// unpack run length
@@ -27,13 +28,22 @@ void RLEBitmap::put_at_alpha(Screen* s, uint16_t x, uint16_t y, uint16_t color) 
 	    dx++;
 	    if (dx >= w) {
 		dx = 0;
+		bh--;
 		buf += s->line_offset;
 	    }
 	    rl--;
 	}
 	pfg = !pfg;
     }
-    // do rest of bitmap
+    while (bh > 0) {
+	while (dx < w) {
+	    if (pfg) buf[dx++] = color;
+	}
+	dx = 0;
+	bh--;
+	buf += s->line_offset;
+    }
+    
 }
 
     

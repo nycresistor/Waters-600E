@@ -1,14 +1,17 @@
 #pragma once
 #include <stdint.h>
+#include <esp_display_panel.hpp>
 
 class Screen {
- public:
-    Screen(const uint16_t width, const uint16_t height,
-	   uint16_t* buffer, const uint16_t line_offset) :
-	width(width), height(height), buffer(buffer), line_offset(line_offset) {}
+public:
+    Screen(esp_panel::drivers::LCD* lcd, uint16_t width, uint16_t height);
     const uint16_t width;
     const uint16_t height;
     const uint16_t line_offset;
     uint16_t* buffer;
+    void flip();
+private:
+    uint8_t which;
+    esp_panel::drivers::LCD* lcd;
 };
 
