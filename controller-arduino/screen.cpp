@@ -13,10 +13,19 @@ Screen::Screen(LCD* lcd, uint16_t width, uint16_t height) :
 }
 
 void Screen::flip() {
-    //    lcd->drawBitmap(0,0,width,height,(const uint8_t*)buffer);
     lcd->switchFrameBufferTo((void*)buffer);
     buffer = (uint16_t*)lcd->getFrameBufferByIndex(which);
     which = (which==0)?1:0;
 }
-       
+
+void Screen::draw_square(int x, int y, int w, int h, uint16_t color)
+{
+    uint16_t* fb = buffer;
+    fb += y*line_offset + x;
+    for (int i = 0; i < h; i++) {
+	for (int j = 0; j < w; j++) fb[j] = color;
+	fb += line_offset;
+    }	
+}
+
     
