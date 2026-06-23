@@ -73,7 +73,6 @@ uint8_t gpio_ext_rd_reg(uint8_t reg) {
 }
 
 bool init_gpio_ext() {
-    Wire.begin(8,9); // SDA 8 SCL 9
     Wire.beginTransmission(GPIO_EXT_ADDR);
     if (Wire.endTransmission() == 0) {
 	print_console("Contacted GPIO extender");
@@ -93,34 +92,26 @@ bool init_gpio_ext() {
 void setup()
 {
     Serial.begin(115200); // Initialize serial communication at 115200 baud rate
-    Serial.println("We are now beginning our investigation");
-    init_gpio_ext();
-
-    Serial.println("Wire library initialized.");
+    Wire.begin(8,9); // SDA 8 SCL 9
 
     lcd = create_lcd();
-
-    Serial.println("LCD created.");
     //auto lcd = create_lcd_without_config();
     // Configure bounce buffer to avoid screen drift
     auto bus = static_cast<BusRGB *>(lcd->getBus());
     bus->configRGB_BounceBufferSize(2*LCD_RGB_BOUNCE_BUFFER_SIZE); // Set bounce buffer to avoid screen drift
     lcd->configFrameBufferNumber(2);
-    Serial.println("LCD configured.");
     lcd->init();
-    Serial.println("LCD init.");
-    // Attach a callback function which will be called when the Vsync signal is detected
     //lcd->attachRefreshFinishCallback(onLCD_RefreshFinishCallback);
-    // Attach a callback function which will be called when every bitmap drawing is completed
     //lcd->attachDrawBitmapFinishCallback(onLCD_DrawFinishCallback);
     lcd->reset();
-    Serial.println("LCD reset.");
     assert(lcd->begin());
-    Serial.println("LCD started.");
     if (lcd->getBasicAttributes().basic_bus_spec.isFunctionValid(LCD::BasicBusSpecification::FUNC_DISPLAY_ON_OFF)) {
         lcd->setDisplayOnOff(true);
     }
     scr = new Screen(lcd,LOGICAL_WIDTH,LCD_HEIGHT);
+
+    init_gpio_ext();
+
     SPLASH_bitmap.put_at_default_alpha(scr, 0xfa00);
     scr->flip();
     SPLASH_bitmap.put_at_default_alpha(scr, 0xfa00);
