@@ -45,7 +45,7 @@ bool FixedFont::put_char_at(Screen* screen, int16_t x, int16_t y, char c, CharAt
     return true;
 }
     
-bool FixedFont::put_str_at(Screen* screen, int16_t x, int16_t y, char* s, CharAttr attribs) {
+bool FixedFont::put_str_at(Screen* screen, int16_t x, int16_t y, const char* s, CharAttr attribs) {
     if (x < 0 || x >= screen->width || y < 0 || y >= screen->height) return false;
     while (*s != '\0' && x < screen->width) {
 	if (!put_char_at(screen,x,y,*s,attribs)) return false;

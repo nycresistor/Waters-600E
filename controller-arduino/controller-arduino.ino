@@ -9,6 +9,7 @@
 
 #include "fonts.h"
 #include "bitmaps.h"
+#include "keypad.h"
 
 extern RLEBitmap SPLASH_bitmap;
 
@@ -72,6 +73,57 @@ uint8_t gpio_ext_rd_reg(uint8_t reg) {
     return Wire.read();
 }
 
+
+/*
+| Column | 1     | 4  | 5    | 6     | 7     | 8     | 11    | 12   |
+|--------|-------|----|------|-------|-------|-------|-------|------|
+| 3      | 3     | 6  | 9    |       | .     |       | Right |      |
+| 9      | 2     | 5  | 8    | Clear | 0     | Enter | Home  | Down |
+| 13     | 1     | F5 | F4   | F3    | F2    | F1    | 4     | 7    |
+| 14     | SetUp |    | PEvt | PGrad | OGrad | Isoc  | Up    | Left |
+
+| Connector | Port | Pin no |
+|-----
+*/
+
+
+void gpio_ext_set_col(uint8_t col) {
+    // Columns are
+    const uint8_t col_pins[KP_COLUMNS] = {
+	6,3,1,9 };
+    // set all to input
+    gpio_ext_wr_reg(0x04, 0xff);
+    gpio_ext_wr_reg(0x05, 0xff);
+    if (col >= KP_COLUMNS) return;
+    uint8_t which = col_pins[col];
+    if (which < 8) {
+	gpio_ext_wr_reg(0x04, 0xff ^ (1 << which));
+	gpio_ext_wr_reg(0x02, 1 << which);
+    } else {
+	which -= 8;
+	gpio_ext_wr_reg(0x05, 0xff ^ (1 << which));
+	gpio_ext_wr_reg(0x03, 1 << which);
+    }
+}
+
+#define GET_BIT(FROM,FROM_BIT) \
+    (( FROM >> FROM_BIT ) & 0x01 )
+
+uint8_t gpio_ext_get_rows() {
+    uint8_t rows = 0;
+    uint8_t val = gpio_ext_rd_reg(0x00);
+    rows |= GET_BIT(val,7);
+    rows |= GET_BIT(val,5) << 2;
+    rows |= GET_BIT(val,4) << 4;
+    rows |= GET_BIT(val,2) << 6;
+    val = gpio_ext_rd_reg(0x01);
+    rows |= GET_BIT(val,6) << 1;
+    rows |= GET_BIT(val,5) << 3;
+    rows |= GET_BIT(val,4) << 5;
+    rows |= GET_BIT(val,2) << 7;
+    return rows;
+}
+
 bool init_gpio_ext() {
     Wire.beginTransmission(GPIO_EXT_ADDR);
     if (Wire.endTransmission() == 0) {
@@ -86,6 +138,11 @@ bool init_gpio_ext() {
     } else {
 	print_console("GPIO extender ID wrong");
     }
+    // Set all to input and PORT 0 to push-pull
+    gpio_ext_wr_reg(0x04, 0xff);
+    gpio_ext_wr_reg(0x05, 0xff);
+    gpio_ext_wr_reg(0x11, 0x10);
+    
     return false;
 }
 
@@ -161,13 +218,18 @@ void loop()
 
     CharAttr attr = { .alpha_bg = false, .double_size = false,
 		      .fg = 0xffe7, .bg = 0x000f };
-    waters.put_str_at(scr, 200, 200, "This is not really happening.", attr);
+    //waters.put_str_at(scr, 200, 200, "This is not really happening.", attr);
     attr.double_size = true;
     attr.alpha_bg = true;
     attr.fg = 0x000f;
-    waters.put_str_at(scr, 100, 100, "This is not real", attr);
-    SPLASH_bitmap.put_at_default_alpha(scr, 0xfa00);
+    //waters.put_str_at(scr, 100, 100, "This is not real", attr);
+    //SPLASH_bitmap.put_at_default_alpha(scr, 0xfa00);
     // Scan buttons
+    gpio_ext_set_col(3);
+    String rowstr = String("Row: ") + String(gpio_ext_get_rows(),HEX);
+    waters.put_str_at(scr, 0, 320, rowstr.c_str(), (CharAttr){ .alpha_bg = false, .double_size = false,.fg = 0xffe7, .bg = 0x000f });
+    String framestr = String(frame,HEX);
+    waters.put_str_at(scr, 0, 350, framestr.c_str(), (CharAttr){ .alpha_bg = false, .double_size = false,.fg = 0xffe7, .bg = 0x000f });
     show_console();
     scr->flip();
 }

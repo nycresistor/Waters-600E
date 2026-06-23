@@ -20,7 +20,7 @@ public:
     const uint8_t cell_w;
     const uint8_t cell_h;
     bool put_char_at(Screen* screen, int16_t x, int16_t y, char c, CharAttr attribs);
-    bool put_str_at(Screen* screen, int16_t x, int16_t y, char* s, CharAttr attribs);
+    bool put_str_at(Screen* screen, int16_t x, int16_t y, const char* s, CharAttr attribs);
 };
 
 extern FixedFont waters;
