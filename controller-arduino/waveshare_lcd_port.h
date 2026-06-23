@@ -4,6 +4,7 @@
 #pragma once
 
 #define ESP_PANEL_TOUCH_BUS_SKIP_INIT_HOST 1
+#define ESP_PANEL_EXPANDER_SKIP_INIT_HOST 1
 
 #include <Arduino.h>
 #include <esp_display_panel.hpp>

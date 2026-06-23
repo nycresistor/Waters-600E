@@ -24,7 +24,7 @@ using namespace esp_panel::utils;
 LCD *create_lcd();
 
 LCD* lcd;
-Screen* scr;
+Screen* scr = nullptr;
 
 const int C_W = 60;
 const int C_H = 15;
@@ -51,11 +51,12 @@ void show_console() {
 }
 
 void print_console(const char* txt) {
+    if (scr == nullptr) return;
     console_msg(txt); show_console();
     scr->flip();
 }
 
-/*
+
 void gpio_ext_wr_reg(uint8_t reg, uint8_t val) {
     Wire.beginTransmission(GPIO_EXT_ADDR);
     Wire.write(reg);
@@ -76,31 +77,46 @@ bool init_gpio_ext() {
     Wire.beginTransmission(GPIO_EXT_ADDR);
     if (Wire.endTransmission() == 0) {
 	print_console("Contacted GPIO extender");
+    } else {
+	print_console("Could not contact GPIO extender");
+	return false;
     }
     if (gpio_ext_rd_reg(0x10) == 0x23) {
 	print_console("GPIO extender ID OK");
+	return true;
     } else {
 	print_console("GPIO extender ID wrong");
     }
-    }*/
+    return false;
+}
 
 void setup()
 {
     Serial.begin(115200); // Initialize serial communication at 115200 baud rate
+    Serial.println("We are now beginning our investigation");
+    init_gpio_ext();
+
+    Serial.println("Wire library initialized.");
 
     lcd = create_lcd();
+
+    Serial.println("LCD created.");
     //auto lcd = create_lcd_without_config();
     // Configure bounce buffer to avoid screen drift
     auto bus = static_cast<BusRGB *>(lcd->getBus());
     bus->configRGB_BounceBufferSize(2*LCD_RGB_BOUNCE_BUFFER_SIZE); // Set bounce buffer to avoid screen drift
     lcd->configFrameBufferNumber(2);
+    Serial.println("LCD configured.");
     lcd->init();
+    Serial.println("LCD init.");
     // Attach a callback function which will be called when the Vsync signal is detected
     //lcd->attachRefreshFinishCallback(onLCD_RefreshFinishCallback);
     // Attach a callback function which will be called when every bitmap drawing is completed
     //lcd->attachDrawBitmapFinishCallback(onLCD_DrawFinishCallback);
     lcd->reset();
+    Serial.println("LCD reset.");
     assert(lcd->begin());
+    Serial.println("LCD started.");
     if (lcd->getBasicAttributes().basic_bus_spec.isFunctionValid(LCD::BasicBusSpecification::FUNC_DISPLAY_ON_OFF)) {
         lcd->setDisplayOnOff(true);
     }
@@ -133,7 +149,6 @@ void setup()
     }
     if (WiFi.status() == WL_CONNECTED) print_console("Connected to network");
     else print_console("Connection failed, giving up.");
-    //init_gpio_ext();
 }
 
 int frame = 0;
