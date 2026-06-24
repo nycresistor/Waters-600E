@@ -2,10 +2,15 @@
 
 using namespace esp_panel::drivers;
 
-Screen::Screen(LCD* lcd, uint16_t width, uint16_t height) :
+Screen::Screen(LCD* lcd, uint16_t width, uint16_t height,
+	       uint16_t xoff, uint16_t yoff) :
     width(width),
     height(height),
+    xoff(xoff),
+    yoff(yoff),
+    rot(true),
     line_offset(lcd->getFrameWidth()),
+    lcd_h(lcd->getFrameHeight()),
     lcd(lcd)
 {
     buffer = (uint16_t*)lcd->getFrameBufferByIndex(1);
@@ -18,13 +23,16 @@ void Screen::flip() {
     which = (which==0)?1:0;
 }
 
+void Screen::clear(uint16_t color) {
+    draw_square(300,300,100,100,color);
+    uint32_t last_px = lcd->getFrameHeight() * lcd->getFrameWidth();
+    for (uint32_t i = 0; i < last_px; i++) buffer[i] = color;
+}
+
 void Screen::draw_square(int x, int y, int w, int h, uint16_t color)
 {
-    uint16_t* fb = buffer;
-    fb += y*line_offset + x;
     for (int i = 0; i < h; i++) {
-	for (int j = 0; j < w; j++) fb[j] = color;
-	fb += line_offset;
+	for (int j = 0; j < w; j++) set_px(x+j,y+i,color);
     }	
 }
 

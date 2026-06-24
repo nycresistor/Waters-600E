@@ -2,8 +2,9 @@
 #include "screen.h"
 
 class RLEBitmap {
-private:
+public:
     const uint16_t w, h, x, y;
+private:
     const uint8_t* const data;
     const uint16_t dlen;
 public:

@@ -12,8 +12,9 @@ FixedFont::FixedFont( const int16_t* enc_table, const uint8_t* font_data,
 FixedFont waters(font_enc_map, font_data, MAX_ENCODING+1,
 		 8, 16);
 
-inline void fill2x2(uint16_t* buf, uint16_t color, uint16_t off) {
-    buf[0] = color; buf[1] = color; buf[off] = color; buf[off+1] = color;
+inline void fill2x2(Screen* s, uint16_t x, uint16_t y, uint16_t color) {
+    s->set_px(x,y,color); s->set_px(x+1,y,color); y++;
+    s->set_px(x,y,color); s->set_px(x+1,y,color); y++;
 }
 
 bool FixedFont::put_char_at(Screen* screen, int16_t x, int16_t y, char c, CharAttr attribs) {
@@ -21,25 +22,24 @@ bool FixedFont::put_char_at(Screen* screen, int16_t x, int16_t y, char c, CharAt
     if (c >= enc_table_size) return false;
     int idx = enc_table[c];
     if (idx == -1) return false;
-    uint16_t* buf = screen->buffer + (y*screen->line_offset) + x;
     if (attribs.double_size) {
 	for (int i = 0; i < cell_h; i++) {
 	    for (int j = 0; j < cell_w; j++) {
 		if (font_data[idx] & (0x80>>j))
-		    fill2x2(buf+j*2, attribs.fg, screen->line_offset);
-		else if (!attribs.alpha_bg) fill2x2(buf+j*2, attribs.bg, screen->line_offset);
+		    fill2x2(screen, x+(2*j), y, attribs.fg);
+		else if (!attribs.alpha_bg) fill2x2(screen, x+(2*j), y, attribs.bg);
 	    }
 	    idx++;
-	    buf += screen->line_offset*2;
+	    y+=2;
 	}
     } else {
 	for (int i = 0; i < cell_h; i++) {
 	    for (int j = 0; j < cell_w; j++) {
-		if (font_data[idx] & (0x80>>j)) buf[j] = attribs.fg;
-		else if (!attribs.alpha_bg) buf[j] = attribs.bg;
+		if (font_data[idx] & (0x80>>j)) screen->set_px(x+j,y,attribs.fg);
+		else if (!attribs.alpha_bg) screen->set_px(x+j, y, attribs.bg);
 	    }
 	    idx++;
-	    buf += screen->line_offset;
+	    y++;
 	}
     }
     return true;

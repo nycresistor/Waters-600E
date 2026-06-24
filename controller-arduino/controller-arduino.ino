@@ -16,8 +16,12 @@ extern RLEBitmap SPLASH_bitmap;
 using namespace esp_panel::drivers;
 using namespace esp_panel::utils;
 
-#define LOGICAL_WIDTH 640
-#define LOGICAL_HEIGHT 480
+// Offsets from edge of physical panel to our logical
+// panel
+#define Y_OFF 26
+#define X_OFF 105
+#define LOGICAL_WIDTH 518
+#define LOGICAL_HEIGHT 420
 
 #define TERMINAL_WIDTH (LOGICAL_WIDTH/8)
 #define TERMINAL_HEIGHT (LOGICAL_HEIGHT/8)
@@ -165,13 +169,17 @@ void setup()
     if (lcd->getBasicAttributes().basic_bus_spec.isFunctionValid(LCD::BasicBusSpecification::FUNC_DISPLAY_ON_OFF)) {
         lcd->setDisplayOnOff(true);
     }
-    scr = new Screen(lcd,LOGICAL_WIDTH,LCD_HEIGHT);
+    scr = new Screen(lcd,LOGICAL_WIDTH,LOGICAL_HEIGHT,X_OFF,Y_OFF);
 
     init_gpio_ext();
 
-    SPLASH_bitmap.put_at_default_alpha(scr, 0xfa00);
+    int spl_x = (scr->width - SPLASH_bitmap.w) / 2;
+    int spl_y = (scr->height - SPLASH_bitmap.h) / 2;
+    scr->clear(0xfa00);
+    SPLASH_bitmap.put_at_alpha(scr, spl_x, spl_y, 0xffff);
     scr->flip();
-    SPLASH_bitmap.put_at_default_alpha(scr, 0xfa00);
+    scr->clear(0xfa00);
+    SPLASH_bitmap.put_at_alpha(scr, spl_x, spl_y, 0xffff);
     print_console("Booting...");
     const char* const* ssids_iter = ssids;
     while (ssids_iter != nullptr && *ssids_iter != nullptr) {
@@ -202,6 +210,16 @@ void setup()
 int frame = 0;
 const int blocksize = 40;
 
+void draw_grid() {
+    Serial.print("height "); Serial.println(scr->height);
+    for (int x = 0; x < scr->width; x += 10) {
+	scr->draw_square(x,0,1,scr->height,((x%50)==0)?0x0ff0:0x180f);
+    }
+    for (int y = 0; y < scr->height; y += 10) {
+	scr->draw_square(0,y,scr->width,1,((y%50)==0)?0x0ff0:0x180f);
+    }
+}
+
 void loop()
 {
     delay(100);
@@ -231,5 +249,6 @@ void loop()
     String framestr = String(frame,HEX);
     waters.put_str_at(scr, 0, 350, framestr.c_str(), (CharAttr){ .alpha_bg = false, .double_size = false,.fg = 0xffe7, .bg = 0x000f });
     show_console();
+    draw_grid();
     scr->flip();
 }

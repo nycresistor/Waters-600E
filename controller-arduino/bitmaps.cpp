@@ -24,12 +24,13 @@ void RLEBitmap::put_at_alpha(Screen* s, uint16_t x, uint16_t y, uint16_t color) 
 	} else rl = data[idx] & 0x7f;
 	while (rl > 0) {
 	    if (pfg)
-		buf[dx] = color;
+		s->set_px(x+dx, y, color);
+	    //buf[dx] = color;
 	    dx++;
 	    if (dx >= w) {
 		dx = 0;
 		bh--;
-		buf += s->line_offset;
+		y++;
 	    }
 	    rl--;
 	}
@@ -37,11 +38,11 @@ void RLEBitmap::put_at_alpha(Screen* s, uint16_t x, uint16_t y, uint16_t color) 
     }
     while (bh > 0) {
 	while (dx < w) {
-	    if (pfg) buf[dx++] = color;
+	    if (pfg) s->set_px(x+(dx++),y,color); //buf[dx++] = color;
 	}
 	dx = 0;
+	y++;
 	bh--;
-	buf += s->line_offset;
     }
     
 }
